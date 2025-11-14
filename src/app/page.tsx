@@ -5,12 +5,13 @@ import { AppHeader } from '@/components/app-header';
 import { MenuSection } from '@/components/menu-section';
 import { OrderPanel } from '@/components/order-panel';
 import { OrderSummaryDialog } from '@/components/order-summary-dialog';
-import { menuCategories } from '@/lib/data';
+import { menuCategories, menuItems as allMenuItems } from '@/lib/data';
 import type { MenuItem, OrderItem, MenuCategory } from '@/lib/types';
-import { processOrder, type ProcessOrderResult, processVoiceCommand } from './actions';
+import { processOrder, type ProcessOrderResult, processVoiceCommand, getRecommendations } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { RecommendationBar } from '@/components/recommendation-bar';
 
 // For SpeechRecognition
 declare global {
@@ -26,13 +27,13 @@ export default function Home() {
   const [aiResult, setAiResult] = useState<ProcessOrderResult | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isSummaryOpen, setSummaryOpen] = useState(false);
+  const [recommendedItemIds, setRecommendedItemIds] = useState<string[]>([]);
+  const [isRecommending, setIsRecommending] = useState(false);
   const { toast } = useToast();
 
   const [isListening, setIsListening] = useState(false);
   const [activeCategory, setActiveCategory] = useState<MenuCategory>(menuCategories[0]);
   
-  const allMenuItems = menuCategories.flatMap(c => c.items);
-
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
@@ -233,13 +234,49 @@ export default function Home() {
     setOrderItems([]);
     setAllergyNotes('');
     setAiResult(null);
+    setRecommendedItemIds([]);
   }
+
+  const handleGetRecommendations = async (preference: string) => {
+    if (!preference) {
+      setRecommendedItemIds([]);
+      return;
+    }
+    setIsRecommending(true);
+    try {
+      const ids = await getRecommendations(preference, allMenuItems);
+      setRecommendedItemIds(ids);
+      if (ids.length === 0) {
+        toast({ title: 'No matches found', description: "Our AI couldn't find any items matching your preference." });
+      } else {
+        toast({ title: 'Recommendations updated!', description: 'We\'ve highlighted some items for you.' });
+      }
+    } catch (error) {
+      console.error("Failed to get recommendations:", error);
+      toast({
+        variant: "destructive",
+        title: "AI Error",
+        description: "Could not get recommendations. Please try again.",
+      });
+    } finally {
+      setIsRecommending(false);
+    }
+  };
+
 
   return (
     <>
       <main className="container mx-auto px-4 py-8">
         <AppHeader />
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+
+        <RecommendationBar 
+          onGetRecommendations={handleGetRecommendations}
+          isRecommending={isRecommending}
+          hasRecommendations={recommendedItemIds.length > 0}
+          onClear={() => setRecommendedItemIds([])}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start mt-8">
           <aside className="lg:col-span-1 lg:sticky top-6">
             <h2 className="text-xl font-bold font-headline mb-4">Categories</h2>
             <div className="flex flex-col gap-2">
@@ -259,7 +296,8 @@ export default function Home() {
           <div className="lg:col-span-2">
             <MenuSection 
               category={activeCategory}
-              onAddItem={handleAddItem} 
+              onAddItem={handleAddItem}
+              recommendedItemIds={recommendedItemIds}
             />
           </div>
           

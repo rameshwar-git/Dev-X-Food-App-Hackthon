@@ -3,8 +3,9 @@
 import { summarizeOrderDetails, SummarizeOrderDetailsInput } from '@/ai/flows/summarize-order-details';
 import { extractDietaryRestrictions } from '@/ai/flows/extract-dietary-restrictions';
 import { processVoiceCommandFlow } from '@/ai/flows/process-voice-command';
+import { recommendMenuItems } from '@/ai/flows/recommend-menu-items';
 import { ProcessVoiceCommandInput } from '@/ai/schemas/voice-command-schemas';
-import type { OrderItem } from '@/lib/types';
+import type { OrderItem, MenuItem } from '@/lib/types';
 
 export interface ProcessOrderResult {
   summary: string;
@@ -58,4 +59,25 @@ export async function processVoiceCommand(
     }))
   };
   return processVoiceCommandFlow(input);
+}
+
+
+export async function getRecommendations(
+  userPreference: string,
+  menuItems: MenuItem[]
+): Promise<string[]> {
+  if (!userPreference) {
+    return [];
+  }
+  const result = await recommendMenuItems({
+    userPreference,
+    menuItems: menuItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+    })),
+  });
+  return result.recommendedItemIds;
 }
