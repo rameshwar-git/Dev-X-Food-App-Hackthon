@@ -56,6 +56,11 @@ export default function Home() {
       };
 
       recognition.onerror = (event: any) => {
+        if (event.error === 'no-speech') {
+            // Don't show an error if the user just didn't say anything.
+            setIsListening(false);
+            return;
+        }
         console.error('Speech recognition error', event.error);
         toast({ variant: 'destructive', title: 'Voice Error', description: 'Could not recognize speech.' });
         setIsListening(false);
@@ -69,7 +74,7 @@ export default function Home() {
       
       recognitionRef.current = recognition;
     }
-  }, [isListening, orderItems]); // Re-create if orderItems changes, so the latest order is available in onresult
+  }, [isListening, orderItems, toast]); // Re-create if orderItems changes, so the latest order is available in onresult
 
   const handleVoiceCommand = (command: any) => {
     console.log("Handling command", command);
