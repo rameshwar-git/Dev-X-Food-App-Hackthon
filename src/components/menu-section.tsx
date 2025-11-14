@@ -33,7 +33,7 @@ export function MenuSection({ category, onAddItem }: MenuSectionProps) {
               
             </CardContent>
             <CardFooter className="flex justify-between items-center">
-              <p className="text-lg font-semibold text-primary">${item.price.toFixed(2)}</p>
+              <p className="text-lg font-semibold text-primary">₹{item.price.toFixed(2)}</p>
               <Button onClick={() => onAddItem(item)}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add to Order
               </Button>
