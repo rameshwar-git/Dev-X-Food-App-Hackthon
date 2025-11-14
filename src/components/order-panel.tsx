@@ -2,8 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import type { OrderItem } from '@/lib/types';
-import { Minus, Plus, Trash2, Loader2, Send, Mic, MicOff } from 'lucide-react';
-import { Label } from '@/components/ui/label';
+import { Minus, Plus, Trash2, Loader2, Send } from 'lucide-react';
 
 interface OrderPanelProps {
   orderItems: OrderItem[];
@@ -12,8 +11,6 @@ interface OrderPanelProps {
   onUpdateSpecialRequests: (itemId: string, requests: string) => void;
   onReviewOrder: () => void;
   isReviewing: boolean;
-  onVoiceCommand: () => void;
-  isListening: boolean;
 }
 
 export function OrderPanel({
@@ -23,8 +20,6 @@ export function OrderPanel({
   onUpdateSpecialRequests,
   onReviewOrder,
   isReviewing,
-  onVoiceCommand,
-  isListening,
 }: OrderPanelProps) {
   const subtotal = orderItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.08;
@@ -107,16 +102,6 @@ export function OrderPanel({
                   Review Order
                 </>
               )}
-            </Button>
-            <Button
-                size="lg"
-                variant={isListening ? 'destructive' : 'outline'}
-                onClick={onVoiceCommand}
-                disabled={isReviewing}
-                className="px-4"
-                aria-label="Use voice command"
-            >
-                {isListening ? <MicOff /> : <Mic />}
             </Button>
         </div>
       </CardFooter>
