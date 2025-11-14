@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RecommendationBar } from '@/components/recommendation-bar';
+import { Accordion } from '@/components/ui/accordion';
 
 // For SpeechRecognition
 declare global {
@@ -303,22 +304,24 @@ export default function Home() {
 
           <div className="lg:col-span-2">
              {recommendedItemIds.length > 0 ? (
-              <div className="space-y-12">
-                {recommendedCategories.map(category => (
-                  <MenuSection 
-                    key={category.id}
-                    category={category}
-                    onAddItem={handleAddItem}
-                    recommendedItemIds={recommendedItemIds}
-                  />
-                ))}
-              </div>
+                <Accordion type="multiple" defaultValue={recommendedCategories.map(c => c.id)} className="w-full space-y-4">
+                    {recommendedCategories.map(category => (
+                        <MenuSection 
+                            key={category.id}
+                            category={category}
+                            onAddItem={handleAddItem}
+                            recommendedItemIds={recommendedItemIds}
+                            isCollapsible={true}
+                        />
+                    ))}
+              </Accordion>
             ) : (
-              <MenuSection 
-                category={activeCategory}
-                onAddItem={handleAddItem}
-                recommendedItemIds={[]}
-              />
+                <MenuSection 
+                    category={activeCategory}
+                    onAddItem={handleAddItem}
+                    recommendedItemIds={[]}
+                    isCollapsible={false}
+                />
             )}
           </div>
           
@@ -347,3 +350,5 @@ export default function Home() {
     </>
   );
 }
+
+    

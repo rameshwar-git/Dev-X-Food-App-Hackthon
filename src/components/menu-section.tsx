@@ -4,18 +4,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import type { MenuItem, MenuCategory } from '@/lib/types';
 import { PlusCircle, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
 
 interface MenuSectionProps {
   category: MenuCategory;
   onAddItem: (item: MenuItem) => void;
   recommendedItemIds: string[];
+  isCollapsible?: boolean;
 }
 
-export function MenuSection({ category, onAddItem, recommendedItemIds }: MenuSectionProps) {
-  return (
-    <section>
-      <h2 className="text-2xl font-bold font-headline mb-4">{category.name}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+export function MenuSection({ category, onAddItem, recommendedItemIds, isCollapsible = false }: MenuSectionProps) {
+  
+  const content = (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {category.items.map((item) => {
           const isRecommended = recommendedItemIds.includes(item.id);
           return (
@@ -57,6 +59,27 @@ export function MenuSection({ category, onAddItem, recommendedItemIds }: MenuSec
           )
         })}
       </div>
+  );
+
+  if (isCollapsible) {
+    return (
+        <AccordionItem value={category.id}>
+            <AccordionTrigger className="text-2xl font-bold font-headline mb-4 -mx-4 px-4 hover:bg-muted rounded-md">
+                {category.name}
+            </AccordionTrigger>
+            <AccordionContent>
+                {content}
+            </AccordionContent>
+        </AccordionItem>
+    );
+  }
+
+  return (
+    <section>
+      <h2 className="text-2xl font-bold font-headline mb-4">{category.name}</h2>
+      {content}
     </section>
   );
 }
+
+    
