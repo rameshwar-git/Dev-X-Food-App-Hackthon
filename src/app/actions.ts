@@ -2,6 +2,8 @@
 
 import { summarizeOrderDetails, SummarizeOrderDetailsInput } from '@/ai/flows/summarize-order-details';
 import { extractDietaryRestrictions } from '@/ai/flows/extract-dietary-restrictions';
+import { processVoiceCommandFlow } from '@/ai/flows/process-voice-command';
+import { ProcessVoiceCommandInput } from '@/ai/schemas/voice-command-schemas';
 import type { OrderItem } from '@/lib/types';
 
 export interface ProcessOrderResult {
@@ -41,4 +43,19 @@ export async function processOrder(
     summary: summaryResult.summary,
     restrictions: restrictionsResult.extractedRestrictions,
   };
+}
+
+export async function processVoiceCommand(
+  command: string,
+  currentOrder: OrderItem[]
+) {
+  const input: ProcessVoiceCommandInput = {
+    command,
+    currentOrder: currentOrder.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        specialRequests: item.specialRequests || undefined,
+    }))
+  };
+  return processVoiceCommandFlow(input);
 }
