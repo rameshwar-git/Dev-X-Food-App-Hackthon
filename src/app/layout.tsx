@@ -24,8 +24,10 @@ export default function RootLayout({
           {children}
         </main>
         <Toaster />
-        <footer className="py-4 text-center text-sm text-muted-foreground">
-          Powered By Agora
+        <footer className="mt-auto py-6 px-4 bg-secondary text-center">
+          <p className="text-sm font-medium text-secondary-foreground">
+            Powered By <span className="font-bold text-primary">Agora</span>
+          </p>
         </footer>
       </body>
     </html>
