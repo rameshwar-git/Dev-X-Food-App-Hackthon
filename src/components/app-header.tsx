@@ -6,7 +6,7 @@ export function AppHeader() {
       <div className="flex items-center justify-center gap-3 mb-2">
         <UtensilsCrossed className="w-8 h-8 text-primary" />
         <h1 className="text-4xl font-bold tracking-tighter font-headline text-primary">
-          Precision Eats
+          Dev-X-Restro
         </h1>
       </div>
       <p className="text-lg text-muted-foreground">
