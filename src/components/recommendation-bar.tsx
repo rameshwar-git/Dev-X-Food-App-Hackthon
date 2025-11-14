@@ -29,7 +29,7 @@ export function RecommendationBar({
   return (
     <Card className="bg-card/80 backdrop-blur-sm">
         <CardContent className="p-4">
-            <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 items-center">
                  <Sparkles className="text-yellow-400 w-6 h-6 mr-2 hidden sm:block" />
                 <Input
                     type="text"
@@ -47,11 +47,12 @@ export function RecommendationBar({
                             setPreference('');
                             onClear();
                         }}
+                        className="w-full sm:w-auto"
                     >
                         <X className="mr-2" /> Clear
                     </Button>
                 ) : (
-                    <Button type="submit" disabled={isRecommending || !preference}>
+                    <Button type="submit" disabled={isRecommending || !preference} className="w-full sm:w-auto">
                         {isRecommending ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

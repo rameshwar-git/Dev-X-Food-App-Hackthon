@@ -9,10 +9,11 @@ import { menuCategories, menuItems as allMenuItems } from '@/lib/data';
 import type { MenuItem, OrderItem, MenuCategory } from '@/lib/types';
 import { processOrder, type ProcessOrderResult, processVoiceCommand, getRecommendations } from './actions';
 import { useToast } from '@/hooks/use-toast';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RecommendationBar } from '@/components/recommendation-bar';
 import { Accordion } from '@/components/ui/accordion';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 // For SpeechRecognition
 declare global {
@@ -34,6 +35,7 @@ export default function Home() {
 
   const [isListening, setIsListening] = useState(false);
   const [activeCategory, setActiveCategory] = useState<MenuCategory>(menuCategories[0]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const recognitionRef = useRef<any>(null);
 
@@ -269,11 +271,49 @@ export default function Home() {
     items: category.items.filter(item => recommendedItemIds.includes(item.id))
   })).filter(category => category.items.length > 0);
 
+  const CategorySidebar = ({ inSheet = false }: { inSheet?: boolean }) => (
+    <aside className="lg:col-span-1 lg:sticky top-6">
+      <h2 className="text-xl font-bold font-headline mb-4">Categories</h2>
+      <div className="flex flex-col gap-2">
+        {menuCategories.map(category => (
+          <Button
+            key={category.id}
+            variant={activeCategory.id === category.id && recommendedItemIds.length === 0 ? 'default' : 'ghost'}
+            onClick={() => {
+              setActiveCategory(category);
+              setRecommendedItemIds([]);
+              if (inSheet) setMobileMenuOpen(false);
+            }}
+            className="justify-start"
+          >
+            {category.name}
+          </Button>
+        ))}
+      </div>
+    </aside>
+  );
+
 
   return (
     <>
       <main className="container mx-auto px-4 py-8">
         <AppHeader />
+
+        <div className="flex items-center justify-between md:hidden mb-4">
+            <h2 className="text-xl font-bold">Menu</h2>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <PanelLeft className="h-5 w-5" />
+                  <span className="sr-only">Open Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="pr-0">
+                  <CategorySidebar inSheet={true} />
+              </SheetContent>
+            </Sheet>
+        </div>
+
 
         <RecommendationBar 
           onGetRecommendations={handleGetRecommendations}
@@ -282,27 +322,12 @@ export default function Home() {
           onClear={() => setRecommendedItemIds([])}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start mt-8">
-          <aside className="lg:col-span-1 lg:sticky top-6">
-            <h2 className="text-xl font-bold font-headline mb-4">Categories</h2>
-            <div className="flex flex-col gap-2">
-              {menuCategories.map(category => (
-                <Button
-                  key={category.id}
-                  variant={activeCategory.id === category.id && recommendedItemIds.length === 0 ? 'default' : 'ghost'}
-                  onClick={() => {
-                    setActiveCategory(category);
-                    setRecommendedItemIds([]);
-                  }}
-                  className="justify-start"
-                >
-                  {category.name}
-                </Button>
-              ))}
-            </div>
-          </aside>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 items-start mt-8">
+          <div className="hidden md:block md:col-span-1">
+            <CategorySidebar />
+          </div>
 
-          <div className="lg:col-span-2">
+          <div className="md:col-span-2 lg:col-span-2">
              {recommendedItemIds.length > 0 ? (
                 <Accordion type="multiple" defaultValue={recommendedCategories.map(c => c.id)} className="w-full space-y-4">
                     {recommendedCategories.map(category => (
@@ -325,7 +350,7 @@ export default function Home() {
             )}
           </div>
           
-          <div className="lg:col-span-1">
+          <div className="md:col-span-3 lg:col-span-1">
             <OrderPanel
               orderItems={orderItems}
               onUpdateQuantity={handleUpdateQuantity}
@@ -350,5 +375,3 @@ export default function Home() {
     </>
   );
 }
-
-    
