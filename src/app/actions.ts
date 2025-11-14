@@ -30,7 +30,7 @@ export async function processOrder(
   };
 
   // Prepare input for restriction extraction
-  const allNotes = items.map(item => item.specialRequests).join(' ') + ' ' + allergyInfo;
+  const allNotes = items.map(item => item.specialRequests).filter(Boolean).join(' ') + ' ' + allergyInfo;
   const restrictionsInput = { orderText: allNotes.trim() };
 
   // Run AI flows in parallel

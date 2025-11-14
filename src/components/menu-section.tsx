@@ -1,20 +1,20 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import type { MenuItem } from '@/lib/types';
+import type { MenuItem, MenuCategory } from '@/lib/types';
 import { PlusCircle } from 'lucide-react';
 
 interface MenuSectionProps {
-  menuItems: MenuItem[];
+  category: MenuCategory;
   onAddItem: (item: MenuItem) => void;
 }
 
-export function MenuSection({ menuItems, onAddItem }: MenuSectionProps) {
+export function MenuSection({ category, onAddItem }: MenuSectionProps) {
   return (
     <section>
-      <h2 className="text-2xl font-bold font-headline mb-4">Menu</h2>
+      <h2 className="text-2xl font-bold font-headline mb-4">{category.name}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {menuItems.map((item) => (
+        {category.items.map((item) => (
           <Card key={item.id} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="relative w-full h-48">
               <Image

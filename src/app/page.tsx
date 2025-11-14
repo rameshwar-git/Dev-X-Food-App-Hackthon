@@ -5,11 +5,12 @@ import { AppHeader } from '@/components/app-header';
 import { MenuSection } from '@/components/menu-section';
 import { OrderPanel } from '@/components/order-panel';
 import { OrderSummaryDialog } from '@/components/order-summary-dialog';
-import { menuItems as allMenuItems } from '@/lib/data';
-import type { MenuItem, OrderItem } from '@/lib/types';
+import { menuCategories } from '@/lib/data';
+import type { MenuItem, OrderItem, MenuCategory } from '@/lib/types';
 import { processOrder, type ProcessOrderResult, processVoiceCommand } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { Mic, MicOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 // For SpeechRecognition
 declare global {
@@ -28,7 +29,10 @@ export default function Home() {
   const { toast } = useToast();
 
   const [isListening, setIsListening] = useState(false);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(allMenuItems);
+  const [activeCategory, setActiveCategory] = useState<MenuCategory>(menuCategories[0]);
+  
+  const allMenuItems = menuCategories.flatMap(c => c.items);
+
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
@@ -57,7 +61,6 @@ export default function Home() {
 
       recognition.onerror = (event: any) => {
         if (event.error === 'no-speech') {
-            // Don't show an error if the user just didn't say anything.
             setIsListening(false);
             return;
         }
@@ -135,7 +138,18 @@ export default function Home() {
         break;
       case 'search_menu':
         const query = command.query.toLowerCase();
-        setMenuItems(allMenuItems.filter(item => item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)));
+        const foundCategory = menuCategories.find(cat => cat.name.toLowerCase().includes(query));
+        if (foundCategory) {
+          setActiveCategory(foundCategory);
+        } else {
+          const foundItems = allMenuItems.filter(item => item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query));
+          if(foundItems.length > 0) {
+            const categoryOfFirstItem = menuCategories.find(cat => cat.items.some(item => item.id === foundItems[0].id));
+            if(categoryOfFirstItem) {
+              setActiveCategory(categoryOfFirstItem);
+            }
+          }
+        }
         toast({ title: 'Menu Searched', description: `Showing results for "${command.query}".` });
         break;
       default:
@@ -160,7 +174,7 @@ export default function Home() {
 
 
   const handleAddItem = (menuItem: MenuItem) => {
-    const existingItem = orderItems.find(item => item.menuItemId === menuItem.id);
+    const existingItem = orderItems.find(item => item.menuItemId === menuItem.id && item.specialRequests === '');
     if (existingItem) {
       handleUpdateQuantity(existingItem.id, existingItem.quantity + 1);
     } else {
@@ -216,7 +230,6 @@ export default function Home() {
   
   const handleConfirmOrder = () => {
     setSummaryOpen(false);
-    // Reset order state after confirmation
     setOrderItems([]);
     setAllergyNotes('');
     setAiResult(null);
@@ -226,15 +239,33 @@ export default function Home() {
     <>
       <main className="container mx-auto px-4 py-8">
         <AppHeader />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+          <aside className="lg:col-span-1 lg:sticky top-6">
+            <h2 className="text-xl font-bold font-headline mb-4">Categories</h2>
+            <div className="flex flex-col gap-2">
+              {menuCategories.map(category => (
+                <Button
+                  key={category.id}
+                  variant={activeCategory.id === category.id ? 'default' : 'ghost'}
+                  onClick={() => setActiveCategory(category)}
+                  className="justify-start"
+                >
+                  {category.name}
+                </Button>
+              ))}
+            </div>
+          </aside>
+
           <div className="lg:col-span-2">
-            <MenuSection menuItems={menuItems} onAddItem={handleAddItem} />
+            <MenuSection 
+              category={activeCategory}
+              onAddItem={handleAddItem} 
+            />
           </div>
-          <div>
+          
+          <div className="lg:col-span-1">
             <OrderPanel
               orderItems={orderItems}
-              allergyNotes={allergyNotes}
-              onAllergyNotesChange={setAllergyNotes}
               onUpdateQuantity={handleUpdateQuantity}
               onRemoveItem={handleRemoveItem}
               onUpdateSpecialRequests={handleUpdateSpecialRequests}

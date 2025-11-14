@@ -7,8 +7,6 @@ import { Label } from '@/components/ui/label';
 
 interface OrderPanelProps {
   orderItems: OrderItem[];
-  allergyNotes: string;
-  onAllergyNotesChange: (notes: string) => void;
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onRemoveItem: (itemId: string) => void;
   onUpdateSpecialRequests: (itemId: string, requests: string) => void;
@@ -20,8 +18,6 @@ interface OrderPanelProps {
 
 export function OrderPanel({
   orderItems,
-  allergyNotes,
-  onAllergyNotesChange,
   onUpdateQuantity,
   onRemoveItem,
   onUpdateSpecialRequests,
@@ -75,15 +71,6 @@ export function OrderPanel({
             ))}
           </div>
         )}
-        <div className="space-y-2">
-          <Label htmlFor="allergy-notes" className="font-semibold">Allergies or General Notes</Label>
-          <Textarea
-            id="allergy-notes"
-            placeholder="e.g. 'severe peanut allergy', 'no cross-contamination'"
-            value={allergyNotes}
-            onChange={(e) => onAllergyNotesChange(e.target.value)}
-          />
-        </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
         {orderItems.length > 0 && (

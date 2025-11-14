@@ -3,6 +3,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
+  category: string;
   image: {
     src: string;
     alt: string;
@@ -19,4 +20,10 @@ export interface OrderItem {
   quantity: number;
   price: number;
   specialRequests: string;
+}
+
+export interface MenuCategory {
+  id: string;
+  name: string;
+  items: MenuItem[];
 }
