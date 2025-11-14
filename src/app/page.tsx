@@ -263,6 +263,11 @@ export default function Home() {
     }
   };
 
+  const recommendedCategories = menuCategories.map(category => ({
+    ...category,
+    items: category.items.filter(item => recommendedItemIds.includes(item.id))
+  })).filter(category => category.items.length > 0);
+
 
   return (
     <>
@@ -283,8 +288,11 @@ export default function Home() {
               {menuCategories.map(category => (
                 <Button
                   key={category.id}
-                  variant={activeCategory.id === category.id ? 'default' : 'ghost'}
-                  onClick={() => setActiveCategory(category)}
+                  variant={activeCategory.id === category.id && recommendedItemIds.length === 0 ? 'default' : 'ghost'}
+                  onClick={() => {
+                    setActiveCategory(category);
+                    setRecommendedItemIds([]);
+                  }}
                   className="justify-start"
                 >
                   {category.name}
@@ -294,11 +302,24 @@ export default function Home() {
           </aside>
 
           <div className="lg:col-span-2">
-            <MenuSection 
-              category={activeCategory}
-              onAddItem={handleAddItem}
-              recommendedItemIds={recommendedItemIds}
-            />
+             {recommendedItemIds.length > 0 ? (
+              <div className="space-y-12">
+                {recommendedCategories.map(category => (
+                  <MenuSection 
+                    key={category.id}
+                    category={category}
+                    onAddItem={handleAddItem}
+                    recommendedItemIds={recommendedItemIds}
+                  />
+                ))}
+              </div>
+            ) : (
+              <MenuSection 
+                category={activeCategory}
+                onAddItem={handleAddItem}
+                recommendedItemIds={[]}
+              />
+            )}
           </div>
           
           <div className="lg:col-span-1">
